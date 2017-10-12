@@ -14,7 +14,8 @@
 		break;
 		case "movie-this": movieThis();
 		break;
-		// case "do-what-it-says": doWhatItSays(); break;		
+		case "do-what-it-says": doWhatItSays();
+		break;		
 	};
 
 	function myTweets() {
@@ -24,11 +25,11 @@
 			if (!error) { 
 				//console.log(data); 
 				 for(var i = 0; i < data.length; i++) {
-				 	var tweetsText = data[i].text +"\n" + "Created on " + data[i].created_at + "\n";
+				 	var tweetsText = data[i].text +"\nCreated on " + data[i].created_at + "\n";
 					console.log(tweetsText);
 				}
 			}  else {
-				console.log("Error :"+ error);
+				console.log("Error :" + error);
 				return;
 			}
 		});
@@ -41,8 +42,8 @@
 			song = "The Sign";
 		}
 		params = song;
-		spotify.search({ type: "track", query: params }, function(err, data) {
-			if(!err){
+		spotify.search({ type: "track", query: params }, function(error, data) {
+			if(!error){
 				var songData = data.tracks.items;
 					if (songData[0] != undefined) {
 						var responseBack = "Artist: " + songData[0].artists[0].name + "\n" +
@@ -65,7 +66,7 @@
 		}
 		params = movie
 		request("http://www.omdbapi.com/?t=" + params + "&y=&plot=short&apikey=40e9cece", function (error, response, body) {
-			if (!error && response.statusCode == 200) {
+			if (!error && response.statusCode === 200) {
 				var movieBody = JSON.parse(body);
 				var toDisplay = "Title: " + movieBody.Title +"\n"+
 				"Year: " + movieBody.Year + "\n"+
@@ -83,4 +84,14 @@
 		});
 	};
 
+	function doWhatItSays() {
+		fs.readFile("random.txt", "utf8", function(error, data){
+			if (!error) {
+				randomTxtArray = data.split(",");
+				spotifyThisSong(randomTxtArray[1]);
+			} else {
+				console.log("Error :" + error);
+			}
+		});
+	};
 	
