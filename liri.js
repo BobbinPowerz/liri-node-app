@@ -1,11 +1,10 @@
-
+	// requiring all needed modules and npm packages
 	var fs = require("fs"); 
 	var request = require("request");
 	var keys = require("./keys.js");
 	var Twitter = require('twitter');
 	var Spotify = require ('node-spotify-api');
-
-
+	//creating switch statement to route all available commands via argv process
 	var action = process.argv[2];
 	switch(action) {
 		case "my-tweets": myTweets(); 
@@ -17,10 +16,12 @@
 		case "do-what-it-says": doWhatItSays();
 		break;		
 	};
-
+	//creating first part of the app functionality with twitter and wrapping it in a function
 	function myTweets() {
+		//pulling twitter key from  the keys file
 		var client = new Twitter(keys.twitter);
 		params = {screen_name: 'AlexZ84775393', count: 20 };
+		//assembling twitter api call and displaying tweets from the data obj
 		client.get("statuses/user_timeline/", params, function(error, data, response){
 			if (!error) { 
 				//console.log(data); 
@@ -29,20 +30,35 @@
 					console.log(tweetsText);
 				}
 			}  else {
+				//error handling
 				console.log("Error :" + error);
 				return;
 			}
 		});
 	};
-
+	//creating second part of the app functionality with spotify api and wrapping it in a function
 	function spotifyThisSong(song) {
+		//pulling the key from keys file
 		var spotify = new Spotify(keys.spotify);
 		var song = process.argv[3];
+		//if no song provided defaults to "the sign"
 		if(!song){
 			song = "The Sign";
+		} else {
+			// allows for multiple words song title
+			var nodeArgs = process.argv;
+			song = "";
+			for (var i = 3; i < nodeArgs.length; i++) {
+				if (i > 3 && i < nodeArgs.length) {
+					song = song + "+" + nodeArgs[i];
+				}
+				else {
+					song += nodeArgs[i];
+				}
+			}
 		}
-		params = song;
-		spotify.search({ type: "track", query: params }, function(error, data) {
+		//assembling spotify api call and building our resopnses from data obj
+		spotify.search({ type: "track", query: song }, function(error, data) {
 			if(!error){
 				var songData = data.tracks.items;
 					if (songData[0] != undefined) {
@@ -58,14 +74,27 @@
 			}
 		});
 	};
-
+	//creating third part of the app functionality with omdb api and wrapping it in a function
 	function movieThis(){
 		var movie = process.argv[3];
+		//if no movie given defaults to "mr nobody"
 		if(!movie){
 			movie = "mr nobody";
+		} else {
+			// allows for multiple words movie title
+			var nodeArgs = process.argv;
+			movie = "";
+			for (var i = 3; i < nodeArgs.length; i++) {
+				if (i > 3 && i < nodeArgs.length) {
+					movie = movie + "+" + nodeArgs[i];
+				}
+				else {
+					movie += nodeArgs[i];
+				}
+			}
 		}
-		params = movie
-		request("http://www.omdbapi.com/?t=" + params + "&y=&plot=short&apikey=40e9cece", function (error, response, body) {
+		// assembles an api call and builds response structure from a large response object
+		request("http://www.omdbapi.com/?t=" + movie + "&y=&plot=short&apikey=40e9cece", function (error, response, body) {
 			if (!error && response.statusCode === 200) {
 				var movieBody = JSON.parse(body);
 				var toDisplay = "Title: " + movieBody.Title +"\n"+
@@ -83,10 +112,11 @@
 			}
 		});
 	};
-
+	//creating final part of the app functionality with file read and spotify and wrapping it in a function
 	function doWhatItSays() {
 		fs.readFile("random.txt", "utf8", function(error, data){
 			if (!error) {
+				//splitting txt file into an array and using last element as song input for spotify api call
 				randomTxtArray = data.split(",");
 				spotifyThisSong(randomTxtArray[1]);
 			} else {
